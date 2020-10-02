@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const uuid = require('uuid');
 
-const User = require('../../models/users');
+const Account = require('../../models/accounts');
 
 router.post('/signup', (req, res) => {
   console.log('req ', req.body);
@@ -12,9 +12,9 @@ router.post('/signup', (req, res) => {
   };
 
   console.log('data', userData);
-  User.create(userData)
-    .then(user => res.json({ msg: 'User created successfully', createdUser: user }))
-    .catch(err => res.status(400).json({ error: 'Unable to create this user.' }));
+  Account.create(userData)
+    .then(account => res.json({ msg: 'Account created successfully', createdUser: account }))
+    .catch(err => res.status(400).json({ error: 'Unable to create this account.' }));
 });
 
 module.exports = router;
