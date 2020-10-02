@@ -6,14 +6,14 @@ const Account = require('../../models/accounts');
 
 router.post('/signup', (req, res) => {
   console.log('req ', req.body);
-  const userData = {
+  const accountData = {
     ...req.body,
     id: uuid.v4()
   };
 
-  console.log('data', userData);
-  Account.create(userData)
-    .then(account => res.json({ msg: 'Account created successfully', createdUser: account }))
+  console.log('data', accountData);
+  Account.create(accountData)
+    .then(account => res.json({ msg: 'Account created successfully', createAccount: account }))
     .catch(err => res.status(400).json({ error: 'Unable to create this account.' }));
 });
 
