@@ -12,7 +12,7 @@ const Account = require('../../models/accounts');
 
 router.post('/signup', (req, res) => {
   const {
-    email, firstName, lastName, password,
+    email, firstName, lastName, password, repeatPassword,
   } = req.body;
 
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -22,36 +22,49 @@ router.post('/signup', (req, res) => {
     firstName,
     lastName,
     password: hashedPassword,
-    repeatPassword: hashedPassword,
     id: uuid.v4(),
   };
 
-  Account.create(accountData)
-    .then((account) => res.status(201).send({
-      auth: true, msg: 'Account created successfully', account,
-    }))
-    .catch((err) => {
+  Account.findOne({ email }).then((acc) => {
+    if (acc) {
+      return res.status(400).json({ error: true, msg: 'Account with this email allready exist.' });
+    }
+
+    if (password !== repeatPassword) {
+      return res.status(400).json({ error: true, msg: 'Password do not match.' });
+    }
+
+    Account.create(accountData).then((account) => res.status(201).send({
+      msg: 'Account created successfully.',
+      account: {
+        firstName: account.firstName,
+        lastName: account.lastName,
+        email: account.email,
+        id: account.id,
+      },
+    })).catch((err) => {
       console.log('err', err);
       return res.status(400).json({ error: 'Unable to create this account.' });
     });
+  });
 });
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   Account.findOne({ email }).exec((err, account) => {
-    if (err) return res.status(500).send({ message: 'Error 500' });
-    if (!account) return res.status(404).send('Account not found');
+    if (err) return res.status(500).json({ error: true, msg: 'Error 500' });
+    if (!account) return res.status(404).json({ error: true, msg: 'Account not found' });
 
     const passwordIsValid = bcrypt.compareSync(password, account.password);
 
-    if (!passwordIsValid) return res.status(401).send({ auth: false, token: null, msg: 'Invalid Credentials' });
+    if (!passwordIsValid) return res.status(401).send({ token: null, msg: 'Invalid Credentials' });
 
     const token = jwt.sign({ id: account.id }, secret, {
       expiresIn: 86400, // expires in 24 hours
     });
 
-    return res.status(200).send({ message: 'Account found', token });
+    return res.status(200).send({ message: 'Account found', token, id: account.id });
   });
 });
 
