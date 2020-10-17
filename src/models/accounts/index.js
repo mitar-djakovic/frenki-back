@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
 const AccountSchema = new mongoose.Schema({
+  id: {
+    type: String,
+  },
   firstName: {
     type: String,
   },
@@ -14,8 +17,8 @@ const AccountSchema = new mongoose.Schema({
     type: String,
   },
   repeatPassword: {
-    type: String
-  }
+    type: String,
+  },
 });
 
-module.exports = Account = mongoose.model('account', AccountSchema);
+module.exports = mongoose.model('account', AccountSchema);
