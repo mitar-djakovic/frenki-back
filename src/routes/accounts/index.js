@@ -27,25 +27,16 @@ router.post('/signup', (req, res) => {
 
   Account.findOne({ email }).then((acc) => {
     if (acc) {
-      return res.status(400).json({ error: true, msg: 'Account with this email allready exist.' });
+      return res.status(400).json({ error: true, message: 'Account with this email allready exist.' });
     }
 
     if (password !== repeatPassword) {
-      return res.status(400).json({ error: true, msg: 'Password do not match.' });
+      return res.status(400).json({ error: true, message: 'Password do not match.' });
     }
 
-    Account.create(accountData).then((account) => res.status(201).send({
-      msg: 'Account created successfully.',
-      account: {
-        firstName: account.firstName,
-        lastName: account.lastName,
-        email: account.email,
-        id: account.id,
-      },
-    })).catch((err) => {
-      console.log('err', err);
-      return res.status(400).json({ error: 'Unable to create this account.' });
-    });
+    Account.create(accountData).then(() => res.status(201).send({
+      message: 'Account created successfully.',
+    })).catch(() => res.status(400).json({ error: 'Unable to create this account.' }));
   });
 });
 
@@ -53,12 +44,12 @@ router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   Account.findOne({ email }).exec((err, account) => {
-    if (err) return res.status(500).json({ error: true, msg: 'Error 500' });
-    if (!account) return res.status(404).json({ error: true, msg: 'Account not found' });
+    if (err) return res.status(500).json({ error: true, message: 'Error 500' });
+    if (!account) return res.status(404).json({ error: true, message: 'Account not found' });
 
     const passwordIsValid = bcrypt.compareSync(password, account.password);
 
-    if (!passwordIsValid) return res.status(401).send({ token: null, msg: 'Invalid Credentials' });
+    if (!passwordIsValid) return res.status(401).send({ token: null, message: 'Invalid Credentials' });
 
     const token = jwt.sign({ id: account.id }, secret, {
       expiresIn: 86400, // expires in 24 hours
